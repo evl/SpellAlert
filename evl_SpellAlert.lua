@@ -1,7 +1,7 @@
 local bit_band = bit.band
 local bit_bor = bit.bor
 
-local ENEMY_PLAYER = bit_bor(COMBATLOG_OBJECT_REACTION_HOSTILE, COMBATLOG_OBJECT_TYPE_PLAYER)
+local ENEMY_PLAYER = bit_bor(COMBATLOG_OBJECT_REACTION_FRIENDLY, COMBATLOG_OBJECT_TYPE_PLAYER)
 
 local HARMFUL_SPELLS = {
 	-- Druid
@@ -83,7 +83,6 @@ local HEALING_SPELLS = {
 	["Regrowth"] = true,
 	["Nourish"] = true,
 	["Revive"] = true,
-	["Tranquility"] = true,
 	
 	-- Paladin
 	["Flash of Light"] = true,
@@ -100,9 +99,6 @@ local HEALING_SPELLS = {
 
 	-- Hunter
 	["Revive Pet"] = true,
-
-	-- Mage
-	["Evocation"] = true,
 }
 
 local BUFF_SPELLS = {
@@ -120,13 +116,13 @@ local BUFF_SPELLS = {
 	["Barkskin"] = true,
 	["Nature's Swiftness"] = true,
 	["Tree of Life"] = true,
+	["Tranquility"] = true,
 
 	-- Hunter
 	["Feign Death"] = true,
 	["Rapid Fire"] = true,
 	["Deterrence"] = true,
 	["The Beast Within"] = true,
-	["Readiness"] = true, -- Does this even work?
 
 	-- Mage
 	["Ice Block"] = true,
@@ -134,7 +130,7 @@ local BUFF_SPELLS = {
 	["Presence of Mind"] = true,
 	["Arcane Power"] = true,
 	["Icy Veins"] = true,
-	["Cold Snap"] = true, -- Does this even work?
+	["Evocation"] = true,
 
 	-- Paladin
 	["Hand of Protection"] = true,
@@ -160,7 +156,6 @@ local BUFF_SPELLS = {
 	["Cloak of Shadows"] = true,
 	["Combat Readiness"] = true,
 	["Adrenaline Rush"] = true,
-	["Preparation"] = true,
 	["Shadow Dance"] = true,
 
 	-- Shaman
@@ -177,6 +172,7 @@ local BUFF_SPELLS = {
 	["Recklessness"] = true,
 	["Spell Reflection"] = true,
 	["Death Wish"] = true,
+	["Deadly Calm"] = true,
 
 	-- Other
 	["Stoneform"] = true,
@@ -192,6 +188,24 @@ end
 
 local function decimalToHex(r,g,b)
     return string.format("%02x%02x%02x", r*255, g*255, b*255)
+end
+
+local function nameFormat(orgName, GUID)
+	local newName = orgName
+	if orgName then
+		newName = orgName
+		local orgNameEnd = (strfind(orgName, "-"))
+		if orgNameEnd then
+			orgNameEnd = orgNameEnd - 1
+			newName = strsub(orgName, 1, orgNameEnd)
+		end
+			
+		local _, playerClass = GetPlayerInfoByGUID(GUID)
+		local classColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[playerClass] or RAID_CLASS_COLORS[playerClass]
+		classColor = decimalToHex(classColor.r, classColor.g, classColor.b)
+		newName = colorize(newName, classColor)
+	end
+	return newName
 end
 
 local buffFrame, spellFrame
@@ -243,17 +257,7 @@ function evl_SpellAlert:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType,
 	local spellId, spellName = ...
 	
 	if eventType == "SPELL_AURA_APPLIED" and hasFlag(destFlags, ENEMY_PLAYER) and BUFF_SPELLS[spellName] then
-		newDestName = destName
-		local destNameEnd = (strfind(destName, "-"))
-		if destNameEnd then
-			destNameEnd = destNameEnd - 1
-			newDestName = strsub(destName, 1, destNameEnd)
-		end
-			
-		local _, destClass = GetPlayerInfoByGUID(destGUID)
-		local destColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[destClass] or RAID_CLASS_COLORS[destClass]
-		destColor = decimalToHex(destColor.r, destColor.g, destColor.b)
-		newDestName = colorize(newDestName, destColor)
+		local newDestName = nameFormat(destName, destGUID)
 		
 		buffFrame:AddMessage(format(ACTION_SPELL_AURA_APPLIED_BUFF_FULL_TEXT_NO_SOURCE, nil, colorize(spellName, "00ff00"), nil, newDestName))
 	elseif eventType == "SPELL_CAST_START" and hasFlag(sourceFlags, ENEMY_PLAYER) then
@@ -275,35 +279,6 @@ function evl_SpellAlert:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType,
 		if color then
 			local template
 			
-			if sourceName then
-				newSourceName = sourceName
-				local sourceNameEnd = (strfind(sourceName, "-"))
-				if sourceNameEnd then
-					sourceNameEnd = sourceNameEnd - 1
-					newSourceName = strsub(sourceName, 1, sourceNameEnd)
-				end
-					
-				local _, sourceClass = GetPlayerInfoByGUID(sourceGUID)
-				local sourceColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[sourceClass] or RAID_CLASS_COLORS[sourceClass]
-				sourceColor = decimalToHex(sourceColor.r, sourceColor.g, sourceColor.b)
-				newSourceName = colorize(newSourceName, sourceColor)
-			end
-			
-			if destName then
-				newDestName = destName
-				local destNameEnd = (strfind(destName, "-"))
-				if destNameEnd then
-					destNameEnd = destNameEnd - 1
-					newDestName = strsub(destName, 1, destNameEnd)
-				end
-					
-				local _, destClass = GetPlayerInfoByGUID(destGUID)
-				local destColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[destClass] or RAID_CLASS_COLORS[destClass]
-				destColor = decimalToHex(destColor.r, destColor.g, destColor.b)
-				newDestName = colorize(newDestName, destColor)
-			end
-			
-			
 			if sourceName and destName then
 				template = ACTION_SPELL_CAST_START_FULL_TEXT_NO_SOURCE
 			elseif sourceName then
@@ -312,7 +287,10 @@ function evl_SpellAlert:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType,
 				template = ACTION_SPELL_CAST_START_FULL_TEXT
 			end
 			
-			spellFrame:AddMessage(format(template, newSourceName and newSourceName or sourceName, colorize(spellName, color), nil, newDestName and newDestName or destName))
+			local newSourceName = nameFormat(sourceName, sourceGUID)
+			local newDestName = nameFormat(destName, destGUID)
+			
+			spellFrame:AddMessage(format(template, newSourceName, colorize(spellName, color), nil, newDestName))
 		end
 	end
 end
