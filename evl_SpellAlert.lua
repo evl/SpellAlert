@@ -4,6 +4,33 @@ local bit_bor = bit.bor
 local ENEMY_PLAYER = bit_bor(COMBATLOG_OBJECT_REACTION_HOSTILE, COMBATLOG_OBJECT_TYPE_PLAYER)
 
 local HARMFUL_SPELLS = {
+	-- Druid
+	["Entangling Roots"] = true,
+	["Cyclone"] = true,
+	["Wrath"] = true,
+	["Starfire"] = true,
+	["Hibernate"] = true,
+	["Starsurge"] = true,
+
+	-- Hunter
+	["Aimed Shot"] = true,
+	["Steady Shot"] = true,
+	["Cobra Shot"] = true,
+	["Scare Beast"] = true,
+
+	-- Mage
+	["Polymorph"] = true,
+	["Frostbolt"] = true,
+	["Fireball"] = true,
+	["Arcane Blast"] = true,
+	["Pyroblast"] = true,
+	["Flamestrike"] = true,
+	["Scorch"] = true,
+	["Frostfire Bolt"] = true,
+
+	-- Paladin
+	["Exorcism"] = true,
+
 	-- Priest
 	["Mind Control"] = true,
 	["Mind Blast"] = true,
@@ -12,29 +39,12 @@ local HARMFUL_SPELLS = {
 	["Holy Fire"] = true,
 	["Vampiric Touch"] = true,
 	["Mind Spike"] = true,
-
-	-- Druid
-	["Entangling Roots"] = true,
-	["Cyclone"] = true,
-	["Wrath"] = true,
-	["Starfire"] = true,
-	
-	-- Hunter
-	["Aimed Shot"] = true,
-	["Steady Shot"] = true,
-	["Cobra Shot"] = true,
-	
-	-- Mage
-	["Polymorph"] = true,
-	["Frostbolt"] = true,
-	["Fireball"] = true,
-	["Arcane Blast"] = true,
-	["Pyroblast"] = true,
-	["Flamestrike"] = true,
+	["Mass Dispel"] = true,
 	
 	-- Shaman
 	["Lightning Bolt"] = true,
 	["Chain Lightning"] = true,
+	["Lava Burst"] = true,
 	["Hex"] = true,
 	
 	-- Warlock
@@ -51,9 +61,11 @@ local HARMFUL_SPELLS = {
 	["Immolate"] = true,
 	["Haunt"] = true,
 	["Chaos Bolt"] = true,
-	
-	-- Paladin
-	["Exorcism"] = true,
+	["Searing Pain"] = true,
+	["Banish"] = true,
+
+	-- Warrior
+	["Shattering Throw"] = true,
 }
 
 local HEALING_SPELLS = {
