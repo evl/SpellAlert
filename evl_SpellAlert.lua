@@ -11,6 +11,7 @@ local HARMFUL_SPELLS = {
 	["Smite"] = true,
 	["Holy Fire"] = true,
 	["Vampiric Touch"] = true,
+	["Mind Spike"] = true,
 
 	-- Druid
 	["Entangling Roots"] = true,
@@ -20,11 +21,11 @@ local HARMFUL_SPELLS = {
 	
 	-- Hunter
 	["Aimed Shot"] = true,
+	["Steady Shot"] = true,
+	["Cobra Shot"] = true,
 	
 	-- Mage
 	["Polymorph"] = true,
-	["Polymorph: Pig"] = true,
-	["Polymorph: Turtle"] = true,
 	["Frostbolt"] = true,
 	["Fireball"] = true,
 	["Arcane Blast"] = true,
@@ -33,7 +34,8 @@ local HARMFUL_SPELLS = {
 	
 	-- Shaman
 	["Lightning Bolt"] = true,
-	["Chain Lightning"] = true,	
+	["Chain Lightning"] = true,
+	["Hex"] = true,
 	
 	-- Warlock
 	["Fear"] = true,
@@ -45,44 +47,50 @@ local HARMFUL_SPELLS = {
 	["Soul Fire"] = true,
 	["Unstable Affliction"] = true,
 	["Incinerate"] = true,
-	["Shadowfury"] = true,
+	["Hand of Gul'dan"] = true,
+	["Immolate"] = true,
+	["Haunt"] = true,
+	["Chaos Bolt"] = true,
 	
 	-- Paladin
+	["Exorcism"] = true,
 }
 
 local HEALING_SPELLS = {
 	-- Priest
-	["Binding Heal"] = true,
-	["Circle of Healing"] = true,
 	["Flash Heal"] = true,
-	["Greater Heal"] = true,
-	["Heal"] = true,
-	["Lesser Heal"] = true,	
-	["Prayer of Healing"] = true,
 	["Resurrection"] = true,
+	["Heal"] = true,
+	["Greater Heal"] = true,
+	["Binding Heal"] = true,
 	
 	-- Druid
 	["Healing Touch"] = true,
 	["Regrowth"] = true,
+	["Nourish"] = true,
+	["Revive"] = true,
 	
 	-- Paladin
 	["Flash of Light"] = true,
 	["Holy Light"] = true,
+	["Divine Light"] = true,
 	["Redemption"] = true,
 		
 	-- Shaman
 	["Chain Heal"] = true,	
 	["Healing Wave"] = true,
-	["Lesser Healing Wave"] = true,
+	["Healing Surge"] = true,
+	["Greater Healing Wave"] = true,
 	["Ancestral Spirit"] = true,
 }
 
 local BUFF_SPELLS = {
 	["Bloodlust"] = true,
+	["Time Warp"] = true,
 	["Adrenaline Rush"] = true,
 	["Avenging Wrath"] = true,
-	["Blessing of Freedom"] = true,
-	["Blessing of Protection"] = true,
+	["Hand of Freedom"] = true,
+	["Hand of Protection"] = true,
 	["Death Wish"] = true,
 	["Deterrence"] = true,	
 	["Divine Shield"] = true,
@@ -90,12 +98,17 @@ local BUFF_SPELLS = {
 	["Evasion"] = true,
 	["Heroism"] = true,
 	["Pain Suppression"] = true,
-	["Perception"] = true,
 	["Recklessness"] = true,
 	["Spell Reflection"] = true,
 	--["Stealth"] = true,
 	["Stoneform"] = true,
 	["The Beast Within"] = true,
+	["Icebound Fortitude"] = true,
+	["Anti-Magic Shell"] = true,
+	["Unholy Frenzy"] = true,
+	["Barkskin"] = true,
+	["Shield Wall"] = true,
+	["Tree of Life"] = true,
 }
 
 local function hasFlag(flags, flag)
@@ -104,6 +117,10 @@ end
 
 local function colorize(value, color)
 	return "|cff" .. color .. value .. "|r"
+end
+
+local function decimalToHex(r,g,b)
+    return string.format("%02x%02x%02x", r*255, g*255, b*255)
 end
 
 local buffFrame, spellFrame
@@ -155,7 +172,19 @@ function evl_SpellAlert:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType,
 	local spellId, spellName = ...
 	
 	if eventType == "SPELL_AURA_APPLIED" and hasFlag(destFlags, ENEMY_PLAYER) and BUFF_SPELLS[spellName] then
-		buffFrame:AddMessage(format(ACTION_SPELL_AURA_APPLIED_BUFF_FULL_TEXT_NO_SOURCE, nil, colorize(spellName, "00ff00"), nil, destName))
+		newDestName = destName
+		local destNameEnd = (strfind(destName, "-"))
+		if destNameEnd then
+			destNameEnd = destNameEnd - 1
+			newDestName = strsub(destName, 1, destNameEnd)
+		end
+			
+		local _, destClass = GetPlayerInfoByGUID(destGUID)
+		local destColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[destClass] or RAID_CLASS_COLORS[destClass]
+		destColor = decimalToHex(destColor.r, destColor.g, destColor.b)
+		newDestName = colorize(newDestName, destColor)
+		
+		buffFrame:AddMessage(format(ACTION_SPELL_AURA_APPLIED_BUFF_FULL_TEXT_NO_SOURCE, nil, colorize(spellName, "00ff00"), nil, newDestName))
 	elseif eventType == "SPELL_CAST_START" and hasFlag(sourceFlags, ENEMY_PLAYER) then
 		local color
 		
@@ -175,6 +204,35 @@ function evl_SpellAlert:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType,
 		if color then
 			local template
 			
+			if sourceName then
+				newSourceName = sourceName
+				local sourceNameEnd = (strfind(sourceName, "-"))
+				if sourceNameEnd then
+					sourceNameEnd = sourceNameEnd - 1
+					newSourceName = strsub(sourceName, 1, sourceNameEnd)
+				end
+					
+				local _, sourceClass = GetPlayerInfoByGUID(sourceGUID)
+				local sourceColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[sourceClass] or RAID_CLASS_COLORS[sourceClass]
+				sourceColor = decimalToHex(sourceColor.r, sourceColor.g, sourceColor.b)
+				newSourceName = colorize(newSourceName, sourceColor)
+			end
+			
+			if destName then
+				newDestName = destName
+				local destNameEnd = (strfind(destName, "-"))
+				if destNameEnd then
+					destNameEnd = destNameEnd - 1
+					newDestName = strsub(destName, 1, destNameEnd)
+				end
+					
+				local _, destClass = GetPlayerInfoByGUID(destGUID)
+				local destColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[destClass] or RAID_CLASS_COLORS[destClass]
+				destColor = decimalToHex(destColor.r, destColor.g, destColor.b)
+				newDestName = colorize(newDestName, destColor)
+			end
+			
+			
 			if sourceName and destName then
 				template = ACTION_SPELL_CAST_START_FULL_TEXT_NO_SOURCE
 			elseif sourceName then
@@ -182,8 +240,8 @@ function evl_SpellAlert:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType,
 			elseif destName then
 				template = ACTION_SPELL_CAST_START_FULL_TEXT
 			end
-					
-			spellFrame:AddMessage(format(template, sourceName, colorize(spellName, color), nil, destName))
+			
+			spellFrame:AddMessage(format(template, newSourceName and newSourceName or sourceName, colorize(spellName, color), nil, newDestName and newDestName or destName))
 		end
 	end
 end
