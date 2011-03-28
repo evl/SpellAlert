@@ -75,12 +75,15 @@ local HEALING_SPELLS = {
 	["Heal"] = true,
 	["Greater Heal"] = true,
 	["Binding Heal"] = true,
-	
+	["Penance"] = true,
+	["Prayer of Healing"] = true,
+
 	-- Druid
 	["Healing Touch"] = true,
 	["Regrowth"] = true,
 	["Nourish"] = true,
 	["Revive"] = true,
+	["Tranquility"] = true,
 	
 	-- Paladin
 	["Flash of Light"] = true,
@@ -94,33 +97,89 @@ local HEALING_SPELLS = {
 	["Healing Surge"] = true,
 	["Greater Healing Wave"] = true,
 	["Ancestral Spirit"] = true,
+
+	-- Hunter
+	["Revive Pet"] = true,
+
+	-- Mage
+	["Evocation"] = true,
 }
 
 local BUFF_SPELLS = {
-	["Bloodlust"] = true,
-	["Time Warp"] = true,
-	["Adrenaline Rush"] = true,
-	["Avenging Wrath"] = true,
-	["Hand of Freedom"] = true,
-	["Hand of Protection"] = true,
-	["Death Wish"] = true,
-	["Deterrence"] = true,	
-	["Divine Shield"] = true,
-	["Divine Protection"] = true,
-	["Evasion"] = true,
-	["Heroism"] = true,
-	["Pain Suppression"] = true,
-	["Recklessness"] = true,
-	["Spell Reflection"] = true,
-	--["Stealth"] = true,
-	["Stoneform"] = true,
-	["The Beast Within"] = true,
+	-- Death Knight
 	["Icebound Fortitude"] = true,
 	["Anti-Magic Shell"] = true,
+	["Lichborne"] = true,
+	["Pillar of Frost"] = true,
 	["Unholy Frenzy"] = true,
+	
+	-- Druid
+	["Innervate"] = true,
+	["Frenzied Regeneration"] = true,
+	["Nature's Grasp"] = true,
 	["Barkskin"] = true,
-	["Shield Wall"] = true,
+	["Nature's Swiftness"] = true,
 	["Tree of Life"] = true,
+
+	-- Hunter
+	["Feign Death"] = true,
+	["Rapid Fire"] = true,
+	["Deterrence"] = true,
+	["The Beast Within"] = true,
+	["Readiness"] = true, -- Does this even work?
+
+	-- Mage
+	["Ice Block"] = true,
+	["Time Warp"] = true,
+	["Presence of Mind"] = true,
+	["Arcane Power"] = true,
+	["Icy Veins"] = true,
+	["Cold Snap"] = true, -- Does this even work?
+
+	-- Paladin
+	["Hand of Protection"] = true,
+	["Divine Protection"] = true,
+	["Divine Plea"] = true,
+	["Divine Shield"] = true,
+	["Hand of Freedom"] = true,
+	["Avenging Wrath"] = true,
+	["Hand of Sacrifice"] = true,
+	["Aura Mastery"] = true,
+	["Ardent Defender"] = true,
+	["Zealotry"] = true,
+
+	-- Priest
+	["Fear Ward"] = true,
+	["Hymn of Hope"] = true,
+	["Pain Suppression"] = true,
+	["Dispersion"] = true,
+
+	-- Rogue
+	["Evasion"] = true,
+	["Vanish"] = true,
+	["Cloak of Shadows"] = true,
+	["Combat Readiness"] = true,
+	["Adrenaline Rush"] = true,
+	["Preparation"] = true,
+	["Shadow Dance"] = true,
+
+	-- Shaman
+	["Bloodlust"] = true,
+	["Heroism"] = true,
+	["Spiritwalker's Grace"] = true,
+	["Shamanistic Rage"] = true,
+	
+	-- Warlock
+	["Metamorphosis"] = true,
+	
+	-- Warrior
+	["Shield Wall"] = true,
+	["Recklessness"] = true,
+	["Spell Reflection"] = true,
+	["Death Wish"] = true,
+
+	-- Other
+	["Stoneform"] = true,
 }
 
 local function hasFlag(flags, flag)
