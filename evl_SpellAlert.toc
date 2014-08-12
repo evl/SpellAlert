@@ -1,4 +1,4 @@
-## Interface: 30200
+## Interface: 40000
 ## Title: Evl's Spell Alert
 ## Author: Evl
 
